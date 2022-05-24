@@ -4,15 +4,22 @@ const canvacord = require("canvacord");
 
 const { Database } = require("quickmongo");
 const config = require("../config.json");
-const prefix = config.prefix;
 const quickmongo = new Database(config.database_url);
 
 client.on("guildMemberAdd", async (member) => {
+  const autoroleCheck = await quickmongo.fetch(`autorole-${member.guild.id}`);
+  const getmemberRole = await quickmongo.get(`memberrole-${member.guild.id}`);
+  const memberRole = member.guild.roles.cache.get(getmemberRole);
+
+  if (autoroleCheck) {
+    member.roles.add(memberRole);
+  }
+
   const welcomeChannelCheck = await quickmongo.fetch(
     `welcome-${member.guild.id}`
   );
 
-  let welcomer = new canvacord.Leaver()
+  let welcomer = new canvacord.Welcomer()
     .setUsername(member.user.username)
     .setDiscriminator(member.user.discriminator)
     .setMemberCount(member.guild.memberCount)

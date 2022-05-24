@@ -64,5 +64,68 @@ client.on("message", async (message) => {
   if (cmd.length == 0) return;
   let command = client.commands.get(cmd);
   if (!command) command = client.commands.get(client.aliases.get(cmd));
+
+  const PermissionsFlags = [
+    "CREATE_INSTANT_INVITE",
+    "KICK_MEMBERS",
+    "BAN_MEMBERS",
+    "ADMINISTRATOR",
+    "MANAGE_CHANNELS",
+    "MANAGE_GUILD",
+    "ADD_REACTIONS",
+    "VIEW_AUDIT_LOG",
+    "PRIORITY_SPEAKER",
+    "VIEW_CHANNEL",
+    "READ_MESSAGES",
+    "SEND_MESSAGES",
+    "SEND_TTS_MESSAGES",
+    "MANAGE_MESSAGES",
+    "EMBED_LINKS",
+    "ATTACH_FILES",
+    "READ_MESSAGE_HISTORY",
+    "MENTION_EVERYONE",
+    "USE_EXTERNAL_EMOJIS",
+    "EXTERNAL_EMOJIS",
+    "CONNECT",
+    "SPEAK",
+    "MUTE_MEMBERS",
+    "DEAFEN_MEMBERS",
+    "MOVE_MEMBERS",
+    "USE_VAD",
+    "CHANGE_NICKNAME",
+    "MANAGE_NICKNAMES",
+    "MANAGE_ROLES",
+    "MANAGE_WEBHOOKS",
+    "MANAGE_EMOJIS",
+  ];
+
+  if (command.permissions.length) {
+    let invalidPermissionsFlags = [];
+    for (const permission of command.permissions) {
+      if (!PermissionsFlags.includes(permission)) {
+        return console.log(`${permission} is not a valid permission flag`);
+      }
+
+      if (!message.member.hasPermission(permission)) {
+        invalidPermissionsFlags.push(permission);
+      }
+    }
+
+    if (invalidPermissionsFlags.length) {
+      const noPermissionEmbed = new client.Discord.MessageEmbed()
+        .setColor("#ff0000")
+        .setTitle("You do not have permission to use this command!")
+        .setDescription(
+          `You need the following permissions to use this command: ${invalidPermissionsFlags.join(
+            ", "
+          )}`
+        )
+        .setFooter(`${message.author.tag}`, message.author.displayAvatarURL())
+        .setTimestamp();
+
+      return message.channel.send(noPermissionEmbed);
+    }
+  }
+
   if (command) command.run(client, message, args);
 });

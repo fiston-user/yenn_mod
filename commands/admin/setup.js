@@ -6,6 +6,7 @@ const quickmongo = new Database(config.database_url);
 
 module.exports = {
   name: "setup",
+  permissions: ["ADMINISTRATOR"],
   aliases: ["set", "configure", "settings"],
   category: "admin",
   description: "Setup the bot for your server",
@@ -31,10 +32,6 @@ module.exports = {
 
     if (!choice) return message.channel.send(noChoiceEmbed);
 
-    if (!message.member.hasPermission("ADMINISTRATOR"))
-      return message.channel.send(
-        "You do not have permission to use this command."
-      );
 
     /* quickmongo for welcomeChannel */
     const getwelcomeChannel = await quickmongo.get(
@@ -49,11 +46,8 @@ module.exports = {
       welcomeChannelStatus = `<#${getwelcomeChannel}>`;
     } else welcomeChannelStatus = "`Not set`";
 
-    
     /* quickmongo for leaveChannel */
-    const getleaveChannel = await quickmongo.get(
-      `leave-${message.guild.id}`
-    );
+    const getleaveChannel = await quickmongo.get(`leave-${message.guild.id}`);
     const leaveChannelCheck = await quickmongo.fetch(
       `leave-${message.guild.id}`
     );
@@ -62,6 +56,29 @@ module.exports = {
     if (leaveChannelCheck) {
       leaveChannelStatus = `<#${getleaveChannel}>`;
     } else leaveChannelStatus = "`Not set`";
+
+    /* Quickmongo for member Roles */
+    const getmemberRole = await quickmongo.get(
+      `memberrole-${message.guild.id}`
+    );
+    const memberRoleCheck = await quickmongo.fetch(
+      `memberrole-${message.guild.id}`
+    );
+    let memberRoleStatus;
+
+    if (memberRoleCheck) {
+      memberRoleStatus = `<@&${getmemberRole}>`;
+    } else memberRoleStatus = "`Not set`";
+
+    /* Quickmongo for autorole */
+    const autoRoleCheck = await quickmongo.fetch(
+      `autorole-${message.guild.id}`
+    );
+    let autoRoleStatus;
+
+    if (autoRoleCheck) {
+      autoRoleStatus = "🟢 (ENABLED)";
+    } else autoRoleStatus = "🔴 (DISABLED)";
 
     /* quickmongo for anticurse */
     const anticurseCheck = await quickmongo.fetch(`swear-${message.guild.id}`);
@@ -94,6 +111,45 @@ module.exports = {
       message.channel.send(`Leave channel set to ${leaveChannel}`);
     }
 
+    if (choice === "memberRole") {
+      const memberRole =
+        message.mentions.roles.first() ||
+        message.guild.roles.cache.get(args[0]);
+
+      if (!memberRole) return message.channel.send("Invalid role.");
+
+      await quickmongo.set(`memberrole-${message.guild.id}`, memberRole.id);
+      message.channel.send(`Member role set to ${memberRole}`);
+    }
+
+    if (choice === "autorole") {
+      const query = args[1];
+
+      if (!query)
+        return message.channel.send("Please choose from enable or disable.");
+
+      if (!memberRoleCheck)
+        return message.channel.send("Please set a **member role** first.");
+
+      if (query === "enable") {
+        if ((await quickmongo.fetch(`autorole-${message.guild.id}`)) === null) {
+          await quickmongo.set(`autorole-${message.guild.id}`, true);
+          return message.channel.send("Autorole enabled.");
+        } else if (
+          (await quickmongo.fetch(`autorole-${message.guild.id}`)) === false
+        ) {
+          await quickmongo.set(`autorole-${message.guild.id}`, true);
+          return message.channel.send("Autorole enabled.");
+        } else return message.channel.send("Autorole already enabled.");
+      }
+      if (query === "disable") {
+        if ((await quickmongo.fetch(`autorole-${message.guild.id}`)) === true) {
+          await quickmongo.delete(`autorole-${message.guild.id}`);
+          return message.channel.send("Autorole disabled.");
+        } else return message.channel.send("Autorole already disabled.");
+      }
+    }
+
     if (choice === "configure") {
       const configureEmbed = new Discord.MessageEmbed()
         .setColor("#ff0000")
@@ -101,11 +157,11 @@ module.exports = {
         .addField("Usage", `${prefix}setup configure <choice> [value]`)
         .addField("\u200b", "__General__")
         .addField("🖐️ Welcome Channel", `${welcomeChannelStatus}`)
-        .addField("😔 Member Left Channel",  `${leaveChannelStatus}`)
-        .addField("🪄 Autorole", "`COMING SOON`")
+        .addField("😔 Member Left Channel", `${leaveChannelStatus}`)
+        .addField("🪄 Autorole", `\`${autoRoleStatus}\``)
         .addField("\u200b", "__Moderation__")
         .addField("🕹️ Logs Channel", "`COMING SOON`")
-        .addField("👤 Member Role", "`COMING SOON`")
+        .addField("👤 Member Role", `${memberRoleStatus}`)
         .addField("⚠️ Mute Role", "`COMING SOON`")
         .addField("\u200b", "__Features__")
         .addField("🛠️ Anti-Curse", `\`${anticurseStatus}\``);
