@@ -3,10 +3,26 @@ const config = require("../config.json");
 const prefix = config.prefix;
 const { Database } = require("quickmongo");
 const quickmongo = new Database(config.database_url);
+const { badwords } = require("../badwords.json");
 
 // message event
 client.on("message", async (message) => {
   if (message.author.bot) return;
+
+  if ((await quickmongo.fetch(`swear-${message.guild.id}`)) === true) {
+    for (let i = 0; i < badwords.length; i++) {
+      if (
+        message.content.toLowerCase().includes(badwords[i].toLocaleLowerCase())
+      ) {
+        message.delete();
+        message.channel
+          .send(`${message.author} Please don't use bad words!`)
+          .then((msg) => {
+            msg.delete({ timeout: 5000 });
+          });
+      }
+    }
+  }
 
   // check for afk status
   if (await quickmongo.fetch(`afk-${message.author.id}+${message.guild.id}`)) {
