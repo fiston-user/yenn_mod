@@ -11,6 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "ascii-table": "^0.0.9",
+    "canvacord": "^5.1.0",
+    "discord-canvas": "^1.4.1",
     "discord.js": "^12.5.1",
     "fs": "^0.0.1-security",
     "mongoose": "^6.3.4",
