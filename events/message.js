@@ -1,10 +1,45 @@
 const client = require("../index");
 const config = require("../config.json");
 const prefix = config.prefix;
+const { Database } = require("quickmongo");
+const quickmongo = new Database(config.database_url);
 
 // message event
 client.on("message", async (message) => {
   if (message.author.bot) return;
+
+  // check for afk status
+  if (await quickmongo.fetch(`afk-${message.author.id}+${message.guild.id}`)) {
+    const info = await quickmongo.get(
+      `afk-${message.author.id}+${message.guild.id}`
+    );
+    const user = message.member;
+    await quickmongo.delete(`afk-${message.author.id}+${message.guild.id}`);
+
+    try {
+      await user.setNickname(null);
+    } catch (err) {
+      message.channel.send("could not set your nickname");
+    }
+    message.reply(`you are no longer AFK. Reason: ${info}`);
+  }
+
+  // check for mentions
+  const mentionedMember = message.mentions.members.first();
+  if (mentionedMember) {
+    if (
+      await quickmongo.fetch(
+        `afk-${message.mentions.members.first().id}+${message.guild.id}`
+      )
+    ) {
+      message.reply(
+        `${mentionedMember.user.tag} is AFK. Reason: ${await quickmongo.get(
+          `afk-${message.mentions.members.first().id}+${message.guild.id}`
+        )}`
+      );
+    } else return;
+  }
+
   if (!message.content.startsWith(prefix)) return;
   if (!message.guild) return;
 

@@ -9,7 +9,7 @@ module.exports = {
   run: async (client, message, args) => {
     const msg = await message.channel.send("🏓 Pinging...");
     const pingEmbed = new Discord.MessageEmbed()
-      .setColor("RANDOM")
+      .setColor("")
       .setTitle("Pong!")
       .setDescription(`${client.ws.ping}ms`)
       .setTimestamp()
