@@ -18,19 +18,19 @@ module.exports = {
       .setColor("#ff0000")
       .setTitle("No choice specified")
       .setDescription("Please specify a choice to setup.")
-      .addField("Usage", `${prefix}setup <choice-name> [value]`)
+      .addField("Usage", `${prefix}setup <choice-name> [value]`, true)
       .addField("\u200b", "__General__")
-      .addField("🖐️ Welcome Channel", "Choice Name: **welcomeChannel**")
-      .addField("😔 Member Left Channel", "Choice Name: **memberLeftChannel**")
+      .addField("🖐️ Welcome Channel", "Choice Name: **welcomeChannel**", true)
+      .addField("😔 Member Left Channel", "Choice Name: **memberLeftChannel**", true)
       .addField("🪄 Autorole", "Choice Name: **autoRole**")
       .addField("\u200b", "__Moderation__")
-      .addField("🕹️ Logs Channel", "Choice Name: **logsChannel**")
-      .addField("👤 Member Role", "Choice Name: **memberRole**")
-      .addField("⚠️ Mute Role", "Choice Name: **muteRole**")
+      .addField("🕹️ Logs Channel", "Choice Name: **logsChannel**", true)
+      .addField("👤 Member Role", "Choice Name: **memberRole**", true)
+      .addField("⚠️ Mute Role", "Choice Name: **muteRole**", true)
       .addField("\u200b", "__Features__")
-      .addField("🛠️ Anti-Curse", "Choice Name: **anticurse-enable/disable**")
-      .addField("🛠️ Levels", "Choice Name: **leveling**")
-      .addField("🛠️ Levels Channel", "Choice Name: **levelchannel**");
+      .addField("🛠️ Anti-Curse", "Choice Name: **anticurse-enable/disable**", true)
+      .addField("✨ Levels", "Choice Name: **leveling**", true)
+      .addField("🎢 Levels Channel", "Choice Name: **levelchannel**", true);
 
     if (!choice) return message.channel.send(noChoiceEmbed);
 
@@ -217,8 +217,8 @@ module.exports = {
         .addField("⚠️ Mute Role", "`COMING SOON`", true)
         .addField("\u200b", "__Features__")
         .addField("🛠️ Anti-Curse", `\`${anticurseStatus}\``, true)
-        .addField("🛠️ Levels",  `\`${levelStatus}\``, true)
-        .addField("🛠️ Leveling-Channel", `${levelChannelStatus}`, true);
+        .addField("✨ Levels",  `\`${levelStatus}\``, true)
+        .addField("🎢 Leveling-Channel", `${levelChannelStatus}`, true);
 
       return message.channel.send(configureEmbed);
     }
