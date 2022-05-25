@@ -61,11 +61,11 @@ module.exports = {
 
       const helpMenuEmbed = new Discord.MessageEmbed()
       .setTitle("Command Info")
-      .addField(`Prefix`, `\`${prefix}\``)
-      .addField("Name", command.name ? `\`${command.name}\`` : "No name")
-      .addField("Aliases", command.aliases ? command.aliases.join(", ") : "No aliases")
-      .addField("Usage", command.usage ? `\`${prefix}${command.name} ${command.usage}\`` : "No usage")
-      .addField("Description", command.description ? command.description : "No description")
+      .addField(`Prefix`, `\`${prefix}\``, true)
+      .addField("Name", command.name ? `\`${command.name}\`` : "No name", true)
+      .addField("Aliases", command.aliases ? command.aliases.join(", ") : "No aliases", true)
+      .addField("Usage", command.usage ? `\`${prefix}${command.name} ${command.usage}\`` : "No usage", true)
+      .addField("Description", command.description ? command.description : "No description", true)
       .setFooter(client.user.username, client.user.displayAvatarURL())
       .setColor("RANDOM")
 

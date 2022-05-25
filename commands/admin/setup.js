@@ -28,7 +28,9 @@ module.exports = {
       .addField("👤 Member Role", "Choice Name: **memberRole**")
       .addField("⚠️ Mute Role", "Choice Name: **muteRole**")
       .addField("\u200b", "__Features__")
-      .addField("🛠️ Anti-Curse", "Choice Name: **anticurse-enable/disable**");
+      .addField("🛠️ Anti-Curse", "Choice Name: **anticurse-enable/disable**")
+      .addField("🛠️ Levels", "Choice Name: **leveling**")
+      .addField("🛠️ Levels Channel", "Choice Name: **levelchannel**");
 
     if (!choice) return message.channel.send(noChoiceEmbed);
 
@@ -88,6 +90,25 @@ module.exports = {
     if (anticurseCheck === true) {
       anticurseStatus = "🟢 (ENABLED)";
     } else anticurseStatus = "🔴 (DISABLED)";
+
+    /* quickmongo for leveling */
+    const levelCheck = await quickmongo.fetch(`levels-${message.guild.id}`);
+    let levelStatus;
+
+    // check for levels status
+    if (levelCheck === true) {
+      levelStatus = "🟢 (ENABLED)";
+    } else levelStatus = "🔴 (DISABLED)";
+
+    /* quickmongo for leveling channel */
+    const getlevelChannel = await quickmongo.get(`levelchannel-${message.guild.id}`);
+    const levelChannelCheck = await quickmongo.fetch(`levelchannel-${message.guild.id}`);
+    let levelChannelStatus;
+
+    // check for levels channel status
+    if (levelChannelCheck) {
+      levelChannelStatus = `<#${getlevelChannel}>`;
+    } else levelChannelStatus = "`Not set`";
 
     if (choice === "welcome") {
       const welcomeChannel =
@@ -150,21 +171,54 @@ module.exports = {
       }
     }
 
-    if (choice === "configure") {
+    if (choice === "level") {
+      let query = args[1];
+
+      if (!query) return message.channel.send("Please choose from enable or disable.");
+
+      if (query === "enable") {
+        if (await quickmongo.fetch(`levels-${message.guild.id}`) === null){
+          await quickmongo.set(`levels-${message.guild.id}`, true);
+          return message.channel.send("Levels enabled.");
+        } else if (await quickmongo.fetch(`levels-${message.guild.id}`) === false){
+          await quickmongo.set(`levels-${message.guild.id}`, true);
+          return message.channel.send("Levels enabled.");
+        } else return message.channel.send("Levels already enabled.");
+      }
+
+      if (query === "disable") {
+        if (await quickmongo.fetch(`levels-${message.guild.id}`) === true){
+          await quickmongo.delete(`levels-${message.guild.id}`);
+          return message.channel.send("Levels disabled.");
+        } else return message.channel.send("Levels already disabled.");
+      }
+    }
+
+    if (choice === "levelchannel") {
+      const levelsUpChannel = message.mentions.channels.first() || message.guild.channels.cache.get(args[0]);
+      if (!levelsUpChannel) return message.channel.send("Invalid channel.");
+
+      await quickmongo.set(`levelchannel-${message.guild.id}`, levelsUpChannel.id);
+      message.channel.send(`Leveling system channel set to ${levelsUpChannel}`);
+    }
+
+    if (choice === "settings") {
       const configureEmbed = new Discord.MessageEmbed()
         .setColor("#ff0000")
         .setTitle(`⚙️ ${message.guild.name}'s configuration`)
         .addField("Usage", `${prefix}setup configure <choice> [value]`)
         .addField("\u200b", "__General__")
-        .addField("🖐️ Welcome Channel", `${welcomeChannelStatus}`)
-        .addField("😔 Member Left Channel", `${leaveChannelStatus}`)
-        .addField("🪄 Autorole", `\`${autoRoleStatus}\``)
+        .addField("🖐️ Welcome Channel", `${welcomeChannelStatus}`, true)
+        .addField("😔 Member Left Channel", `${leaveChannelStatus}`, true)
+        .addField("🪄 Autorole", `\`${autoRoleStatus}\``, true)
         .addField("\u200b", "__Moderation__")
-        .addField("🕹️ Logs Channel", "`COMING SOON`")
-        .addField("👤 Member Role", `${memberRoleStatus}`)
-        .addField("⚠️ Mute Role", "`COMING SOON`")
+        .addField("🕹️ Logs Channel", "`COMING SOON`", true)
+        .addField("👤 Member Role", `${memberRoleStatus}`, true)
+        .addField("⚠️ Mute Role", "`COMING SOON`", true)
         .addField("\u200b", "__Features__")
-        .addField("🛠️ Anti-Curse", `\`${anticurseStatus}\``);
+        .addField("🛠️ Anti-Curse", `\`${anticurseStatus}\``, true)
+        .addField("🛠️ Levels",  `\`${levelStatus}\``, true)
+        .addField("🛠️ Leveling-Channel", `${levelChannelStatus}`, true);
 
       return message.channel.send(configureEmbed);
     }

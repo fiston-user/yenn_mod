@@ -27,18 +27,33 @@ client.on("message", async (message) => {
     }
   }
 
-  // leveling
-  const randomAmountOfXp = Math.floor(Math.random() * 10) + 1;
-  const hasLeveledUp = await Levels.appendXp(
-    message.author.id,
-    message.guild.id,
-    randomAmountOfXp
-  );
-  if (hasLeveledUp) {
-    const user = await Levels.fetch(message.author.id, message.guild.id);
-    message.channel.send(
-      `${message.author}, congratulations! You have leveled up! to **${user.level}**!!`
+  if ((await quickmongo.fetch(`levels-${message.guild.id}`)) === true) {
+    // leveling
+    const randomAmountOfXp = Math.floor(Math.random() * 10) + 1;
+    const hasLeveledUp = await Levels.appendXp(
+      message.author.id,
+      message.guild.id,
+      randomAmountOfXp
     );
+    if (hasLeveledUp) {
+      const user = await Levels.fetch(message.author.id, message.guild.id);
+
+      const levelsUpChannelCheck = await quickmongo.fetch(
+        `levelchannel-${message.guild.id}`
+      );
+
+      if (levelsUpChannelCheck) {
+        const getLevelUpChannel = await quickmongo.get(
+          `levelchannel-${message.guild.id}`
+        );
+        const levelsUpChannel =
+          message.guild.channels.cache.get(getLevelUpChannel);
+
+        levelsUpChannel.send(
+          `${message.author} has leveled up to level ${user.level}!`
+        );
+      }
+    }
   }
 
   // check for afk status
@@ -115,7 +130,8 @@ client.on("message", async (message) => {
     "MANAGE_WEBHOOKS",
     "MANAGE_EMOJIS",
   ];
-
+ 
+  /*
   if (command.permissions.length) {
     let invalidPermissionsFlags = [];
     for (const permission of command.permissions) {
@@ -143,6 +159,7 @@ client.on("message", async (message) => {
       return message.channel.send(noPermissionEmbed);
     }
   }
+  */
 
   if (command) command.run(client, message, args);
 });

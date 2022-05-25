@@ -6,6 +6,7 @@ const quickmongo = new Database(config.database_url);
 module.exports = {
   name: "anticurse-disbale",
   aliases: ["curse-disbale", "antiswear-disable"],
+  permissions: ["ADMINISTRATOR"],
   category: "admin",
   description: "Disbale the anti-curse system",
 
