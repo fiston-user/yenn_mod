@@ -4,6 +4,7 @@ const prefix = require("../../config.json").prefix;
 
 module.exports = {
   name: "help",
+  permissions: ["SEND_MESSAGES"],
   aliases: ["h"],
   description: "Shows all the commands",
   run: async (client, message, args) => {

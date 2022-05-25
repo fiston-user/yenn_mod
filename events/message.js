@@ -4,9 +4,12 @@ const prefix = config.prefix;
 const { Database } = require("quickmongo");
 const quickmongo = new Database(config.database_url);
 const { badwords } = require("../badwords.json");
+const Levels = require("discord-xp");
+Levels.setURL(config.database_url);
 
 // message event
 client.on("message", async (message) => {
+  if (!message.guild) return;
   if (message.author.bot) return;
 
   if ((await quickmongo.fetch(`swear-${message.guild.id}`)) === true) {
@@ -22,6 +25,20 @@ client.on("message", async (message) => {
           });
       }
     }
+  }
+
+  // leveling
+  const randomAmountOfXp = Math.floor(Math.random() * 10) + 1;
+  const hasLeveledUp = await Levels.appendXp(
+    message.author.id,
+    message.guild.id,
+    randomAmountOfXp
+  );
+  if (hasLeveledUp) {
+    const user = await Levels.fetch(message.author.id, message.guild.id);
+    message.channel.send(
+      `${message.author}, congratulations! You have leveled up! to **${user.level}**!!`
+    );
   }
 
   // check for afk status
